@@ -17,7 +17,7 @@ then
     exit 1
 else
     echo "You are a root user"
-fi
+fi  
 
 VALIDATE() {
     if [ $1 -ne 0 ]
@@ -38,7 +38,7 @@ VALIDATE &? "enabling nodejs 18"
 dnf install nodejs -y &>> $LOGFILE
 VALIDATE &? "installing nodejs 18"
 
-id roboshop &>> $LOGFILE
+id roboshop
 if [ $? -ne 0 ]
 then
     useradd roboshop &>> $LOGFILE
@@ -50,30 +50,30 @@ fi
 mkdir -p /app &>> $LOGFILE
 VALIDATE &? "making directory"
 
-curl -o /tmp/catalogue.zip https://roboshop-builds.s3.amazonaws.com/catalogue.zip &>> $LOGFILE
+curl -L -o /tmp/user.zip https://roboshop-builds.s3.amazonaws.com/user.zip &>> $LOGFILE
 VALIDATE &? "downloading data to database"
 
 cd /app 
 
-unzip -o /tmp/catalogue.zip &>> $LOGFILE
+unzip -o /tmp/user.zip &>> $LOGFILE
 VALIDATE &? "unzip data"
 
-cd /app
+cd /app 
 
 npm install &>> $LOGFILE
 VALIDATE &? "install data"
 
-cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGFILE
-VALIDATE &? "copy catalouge service"
+cp user.service /etc/systemd/system/user.service &>> $LOGFILE
+VALIDATE &? "copy user service"
 
 systemctl daemon-reload &>> $LOGFILE
 VALIDATE &? "daemon reload"
 
-systemctl enable catalogue &>> $LOGFILE
-VALIDATE &? "enable catalogue"
+systemctl enable user &>> $LOGFILE
+VALIDATE &? "enable user"
 
-systemctl start catalogue &>> $LOGFILE
-VALIDATE &? "start catalogue"
+systemctl start user &>> $LOGFILE
+VALIDATE &? "start user"
 
 cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
 VALIDATE &? "creating mongo.repo"

@@ -4,7 +4,6 @@ R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[30m"
-MONGODBIP=
 
 TIME=$(date +%F-%H-%M-%S)
 LOGFILE="/tmp/$0-$TIME.log"
@@ -50,12 +49,12 @@ fi
 mkdir -p /app &>> $LOGFILE
 VALIDATE &? "making directory"
 
-curl -o /tmp/catalogue.zip https://roboshop-builds.s3.amazonaws.com/catalogue.zip &>> $LOGFILE
+curl -L -o /tmp/cart.zip https://roboshop-builds.s3.amazonaws.com/cart.zip &>> $LOGFILE
 VALIDATE &? "downloading data to database"
 
 cd /app 
 
-unzip -o /tmp/catalogue.zip &>> $LOGFILE
+unzip -o /tmp/cart.zip &>> $LOGFILE
 VALIDATE &? "unzip data"
 
 cd /app
@@ -63,23 +62,11 @@ cd /app
 npm install &>> $LOGFILE
 VALIDATE &? "install data"
 
-cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGFILE
-VALIDATE &? "copy catalouge service"
-
 systemctl daemon-reload &>> $LOGFILE
 VALIDATE &? "daemon reload"
 
-systemctl enable catalogue &>> $LOGFILE
-VALIDATE &? "enable catalogue"
+systemctl enable cart &>> $LOGFILE
+VALIDATE &? "enable ccart"
 
-systemctl start catalogue &>> $LOGFILE
-VALIDATE &? "start catalogue"
-
-cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
-VALIDATE &? "creating mongo.repo"
-
-dnf install mongodb-org-shell -y &>> $LOGFILE
-VALIDATE &? "install mongodb-org-shell"
-
-mongo --host $MONGODBIP </app/schema/catalogue.js &>> $LOGFILE
-VALIDATE &? "connecting to mongodb server"
+systemctl start cart &>> $LOGFILE
+VALIDATE &? "start ccart"
