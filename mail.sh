@@ -8,12 +8,12 @@ N="\e[30m"
 GMAIL=jagadishvarma99@gmail.com
 AppPassword=12345678
 
-DATA=relayhost = [smtp.gmail.com]:587
+DATA="relayhost = [smtp.gmail.com]:587
 smtp_use_tls = yes
 smtp_sasl_auth_enable = yes
 smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
 smtp_sasl_security_options = noanonymous
-smtp_sasl_tls_security_options = noanonymous
+smtp_sasl_tls_security_options = noanonymous"
 
 TIME=$(date +%F-%H-%M-%S)
 LOGFILE="/tmp/$0-$TIME.log"
