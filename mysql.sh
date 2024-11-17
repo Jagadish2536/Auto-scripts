@@ -29,28 +29,28 @@ VALIDATE() {
 
 # Disable the mysql module if already enabled
 dnf module disable mysql -y &>> $LOGFILE
-VALIDATE "disable mysql"
+VALIDATE $? "disable mysql"
 
 # Copy the MySQL repo file
 cp mysql.repo /etc/yum.repos.d/mysql.repo &>> $LOGFILE
-VALIDATE "creating mysql.repo"
+VALIDATE $? "creating mysql.repo"
 
 # Install the MySQL community server
 dnf install mysql-community-server -y &>> $LOGFILE
-VALIDATE "installing mysql"
+VALIDATE $? "installing mysql"
 
 # Enable the MySQL service to start on boot
 systemctl enable mysqld &>> $LOGFILE
-VALIDATE "enabling mysql"
+VALIDATE $? "enabling mysql"
 
 # Start the MySQL service
 systemctl start mysqld &>> $LOGFILE
-VALIDATE "starting mysql"
+VALIDATE $? "starting mysql"
 
 # Secure the MySQL installation with a root password
 mysql_secure_installation --set-root-pass RoboShop@1 &>> $LOGFILE
-VALIDATE "password changed for mysql"
+VALIDATE $? "password changed for mysql"
 
 # Test if the MySQL root password works
 mysql -uroot -pRoboShop@1 -e "SELECT 1;" &>> $LOGFILE
-VALIDATE "password is working or not"
+VALIDATE $? "password is working or not"
