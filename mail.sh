@@ -50,13 +50,13 @@ VALIDATE &? "Restart postfix"
 systemctl enable postfix &>> $LOGFILE
 VALIDATE &? "Enable the postfix"
 
-sed -i -e '$a\'$'\n''$DATA' /etc/postfix/main.cf &>> $LOGFILE
+sed -i -e '$a\'$'\n'"$DATA" /etc/postfix/main.cf &>> $LOGFILE
 VALIDATE &? "data copy"
 
 touch /etc/postfix/sasl_passwd &>> $LOGFILE
 VALIDATE &? "creating file sasl_passwd"
 
-sed -e '1 a [smtp.gmail.com]:587 $GMAIL:$AppPassword' /etc/postfix/sasl_passwd &>> $LOGFILE
+sed -e "1 a [smtp.gmail.com]:587 $GMAIL:$AppPassword" /etc/postfix/sasl_passwd &>> $LOGFILE
 VALIDATE &? "setting sasl_passwd"
 
 postmap /etc/postfix/sasl_passwd &>> $LOGFILE

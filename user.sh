@@ -4,7 +4,7 @@ R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[30m"
-MONGODBIP=
+MONGODBIP=172.31.37.214
 
 TIME=$(date +%F-%H-%M-%S)
 LOGFILE="/tmp/$0-$TIME.log"
