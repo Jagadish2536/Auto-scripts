@@ -1,85 +1,94 @@
 #!/bin/bash
 
-R="\e[31m"
-G="\e[32m"
-Y="\e[33m"
-N="\e[30m"
-MONGODBIP=172.31.37.214
+R="\e[31m"  # Red color for error
+G="\e[32m"  # Green color for success
+Y="\e[33m"  # Yellow color for warnings
+N="\e[0m"   # Reset color
+MONGODBIP=172.31.37.214  # MongoDB IP
 
 TIME=$(date +%F-%H-%M-%S)
 LOGFILE="/tmp/$0-$TIME.log"
 
 ID=$(id -u)
 
-if [ $ID -ne 0 ]
-then
+# Check if the script is run as root
+if [ $ID -ne 0 ]; then
     echo "You are not root user"
     exit 1
 else
     echo "You are a root user"
 fi
 
+# Function to validate command success
 VALIDATE() {
-    if [ $1 -ne 0 ]; 
-    then
-        echo -e "${R}$2 is failed${N}"
+    if [ $? -ne 0 ]; then  # Check exit status of last command
+        echo -e "${R}$2 failed${N}"  # Print failure in red
         exit 1
     else
-        echo -e "${G}$2 is success${N}"
+        echo -e "${G}$2 success${N}"  # Print success in green
     fi
 }
 
+# Disable Node.js module and enable Node.js 18
 dnf module disable nodejs -y &>> $LOGFILE
-VALIDATE &? "disabling nodejs"
+VALIDATE $? "disabling nodejs"
 
 dnf module enable nodejs:18 -y &>> $LOGFILE
-VALIDATE &? "enabling nodejs 18"
+VALIDATE $? "enabling nodejs 18"
 
+# Install Node.js
 dnf install nodejs -y &>> $LOGFILE
-VALIDATE &? "installing nodejs 18"
+VALIDATE $? "installing nodejs 18"
 
+# Check if roboshop user exists, create if not
 id roboshop &>> $LOGFILE
-if [ $? -ne 0 ]
-then
+if [ $? -ne 0 ]; then
     useradd roboshop &>> $LOGFILE
-    VALIDATE &? "user add"
+    VALIDATE $? "creating roboshop user"
 else
-    echo -e "roboshop user already exist $Y skip $N"
+    echo -e "roboshop user already exists. $Y skipping user creation. $N"
 fi
 
+# Create application directory
 mkdir -p /app &>> $LOGFILE
-VALIDATE &? "making directory"
+VALIDATE $? "creating /app directory"
 
+# Download catalogue.zip
 curl -o /tmp/catalogue.zip https://roboshop-builds.s3.amazonaws.com/catalogue.zip &>> $LOGFILE
-VALIDATE &? "downloading data to database"
+VALIDATE $? "downloading catalogue.zip"
 
-cd /app 
-
-unzip -o /tmp/catalogue.zip &>> $LOGFILE
-VALIDATE &? "unzip data"
-
+# Unzip catalogue.zip
 cd /app
+unzip -o /tmp/catalogue.zip &>> $LOGFILE
+VALIDATE $? "unzipping catalogue.zip"
 
+# Install Node.js dependencies
 npm install &>> $LOGFILE
-VALIDATE &? "install data"
+VALIDATE $? "installing Node.js dependencies"
 
+# Copy systemd service file for catalogue
 cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGFILE
-VALIDATE &? "copy catalouge service"
+VALIDATE $? "copying catalogue service"
 
+# Reload systemd daemon
 systemctl daemon-reload &>> $LOGFILE
-VALIDATE &? "daemon reload"
+VALIDATE $? "reloading systemd daemon"
 
+# Enable and start the catalogue service
 systemctl enable catalogue &>> $LOGFILE
-VALIDATE &? "enable catalogue"
+VALIDATE $? "enabling catalogue service"
 
 systemctl start catalogue &>> $LOGFILE
-VALIDATE &? "start catalogue"
+VALIDATE $? "starting catalogue service"
 
+# MongoDB repository configuration
 cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
-VALIDATE &? "creating mongo.repo"
+VALIDATE $? "creating mongo.repo"
 
+# Install MongoDB shell (if you only need the shell, not the full server)
 dnf install mongodb-org-shell -y &>> $LOGFILE
-VALIDATE &? "install mongodb-org-shell"
+VALIDATE $? "installing mongodb-org-shell"
 
+# Connect to MongoDB and execute the schema script
 mongo --host $MONGODBIP </app/schema/catalogue.js &>> $LOGFILE
-VALIDATE &? "connecting to mongodb server"
+VALIDATE $? "executing MongoDB schema"

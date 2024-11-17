@@ -1,50 +1,62 @@
 #!/bin/bash
 
+# Define color codes for output
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
-N="\e[30m"
+N="\e[0m"  # Reset color
 
+# Define log file with timestamp
 TIME=$(date +%F-%H-%M-%S)
-LOGFILE="/tmp/$0-$TIME.log"
+LOGFILE="/tmp/$(basename $0)-$TIME.log"
 
+# Check if the script is run as root
 ID=$(id -u)
 
-if [ $ID -ne 0 ]
-then
+if [ $ID -ne 0 ]; then
     echo "You are not root user"
     exit 1
 else
     echo "You are a root user"
-fi
+fi  
 
+# Function to validate the exit status of commands
 VALIDATE() {
-    if [ $1 -ne 0 ]; 
-    then
-        echo -e "${R}$2 is failed${N}"
+    if [ $1 -ne 0 ]; then
+        echo -e "${R}$2 failed${N}"
         exit 1
     else
-        echo -e "${G}$2 is success${N}"
+        echo -e "${G}$2 succeeded${N}"
     fi
 }
 
+# Configure YUM repositories for Erlang
 curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | bash &>> $LOGFILE
-VALIDATE &? "Configure YUM Repos from the script provided by vendor"
+VALIDATE $? "Configuring YUM repos for Erlang"
 
+# Configure YUM repositories for RabbitMQ
 curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | bash &>> $LOGFILE
-VALIDATE &? "Configure YUM Repos for RabbitMQ"
+VALIDATE $? "Configuring YUM repos for RabbitMQ"
 
+# Install RabbitMQ server
 dnf install rabbitmq-server -y &>> $LOGFILE
-VALIDATE &? "Install RabbitMQ"
+VALIDATE $? "Installing RabbitMQ server"
 
+# Enable RabbitMQ service to start on boot
 systemctl enable rabbitmq-server &>> $LOGFILE
-VALIDATE &? "enable RabbitMQ Service"
+VALIDATE $? "Enabling RabbitMQ service"
 
+# Start RabbitMQ service
 systemctl start rabbitmq-server &>> $LOGFILE
-VALIDATE &? "Start RabbitMQ Service"
+VALIDATE $? "Starting RabbitMQ service"
 
+# Wait for RabbitMQ service to initialize properly (optional, but recommended)
+sleep 5
+
+# Add RabbitMQ user
 rabbitmqctl add_user roboshop roboshop123 &>> $LOGFILE
-VALIDATE &? "changing password"
+VALIDATE $? "Adding RabbitMQ user"
 
+# Set permissions for the new user
 rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" &>> $LOGFILE
-VALIDATE &? "set permissions"
+VALIDATE $? "Setting RabbitMQ user permissions"

@@ -1,72 +1,78 @@
 #!/bin/bash
 
-R="\e[31m"
-G="\e[32m"
-Y="\e[33m"
-N="\e[30m"
+R="\e[31m"  # Red color for errors
+G="\e[32m"  # Green color for success
+Y="\e[33m"  # Yellow color for warnings
+N="\e[0m"   # Reset color
 
 TIME=$(date +%F-%H-%M-%S)
 LOGFILE="/tmp/$0-$TIME.log"
 
 ID=$(id -u)
 
-if [ $ID -ne 0 ]
-then
+# Check if the script is run as root
+if [ $ID -ne 0 ]; then
     echo "You are not root user"
     exit 1
 else
     echo "You are a root user"
 fi
 
+# Function to validate the success of a command
 VALIDATE() {
-    if [ $1 -ne 0 ]; 
-    then
-        echo -e "${R}$2 is failed${N}"
+    if [ $? -ne 0 ]; then  # Check exit status of last command
+        echo -e "${R}$2 failed${N}"  # Print failure in red
         exit 1
     else
-        echo -e "${G}$2 is success${N}"
+        echo -e "${G}$2 success${N}"  # Print success in green
     fi
 }
 
+# Disable Node.js module and enable Node.js 18
 dnf module disable nodejs -y &>> $LOGFILE
-VALIDATE &? "disabling nodejs"
+VALIDATE $? "disabling nodejs"
 
 dnf module enable nodejs:18 -y &>> $LOGFILE
-VALIDATE &? "enabling nodejs 18"
+VALIDATE $? "enabling nodejs 18"
 
+# Install Node.js 18
 dnf install nodejs -y &>> $LOGFILE
-VALIDATE &? "installing nodejs 18"
+VALIDATE $? "installing nodejs 18"
 
+# Check if roboshop user exists, create if not
 id roboshop &>> $LOGFILE
-if [ $? -ne 0 ]
-then
+if [ $? -ne 0 ]; then
     useradd roboshop &>> $LOGFILE
-    VALIDATE &? "user add"
+    VALIDATE $? "creating roboshop user"
 else
-    echo -e "roboshop user already exist $Y skip $N"
+    echo -e "roboshop user already exists. $Y skipping user creation. $N"
 fi
 
+# Create application directory
 mkdir -p /app &>> $LOGFILE
-VALIDATE &? "making directory"
+VALIDATE $? "creating /app directory"
 
+# Download cart.zip file
 curl -L -o /tmp/cart.zip https://roboshop-builds.s3.amazonaws.com/cart.zip &>> $LOGFILE
-VALIDATE &? "downloading data to database"
+VALIDATE $? "downloading cart.zip"
 
-cd /app 
-
-unzip -o /tmp/cart.zip &>> $LOGFILE
-VALIDATE &? "unzip data"
-
+# Unzip cart.zip into /app
 cd /app
+unzip -o /tmp/cart.zip &>> $LOGFILE
+VALIDATE $? "unzipping cart.zip"
 
+# Install Node.js dependencies
 npm install &>> $LOGFILE
-VALIDATE &? "install data"
+VALIDATE $? "installing Node.js dependencies"
 
+# Reload systemd daemon
 systemctl daemon-reload &>> $LOGFILE
-VALIDATE &? "daemon reload"
+VALIDATE $? "reloading systemd daemon"
 
+# Enable the cart service to start on boot
 systemctl enable cart &>> $LOGFILE
-VALIDATE &? "enable ccart"
+VALIDATE $? "enabling cart service"
 
+# Start the cart service
 systemctl start cart &>> $LOGFILE
-VALIDATE &? "start ccart"
+VALIDATE $? "starting cart service"
