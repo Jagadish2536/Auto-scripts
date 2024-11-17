@@ -46,6 +46,10 @@ else
     echo -e "${Y}roboshop user already exists, skipping user creation${N}"
 fi
 
+# Copy the shipping.service file to systemd directory
+cp shipping.service /etc/systemd/system/shipping.service &>> $LOGFILE
+VALIDATE $? "Copying shipping.service"
+
 # Create the /app directory
 mkdir -p /app &>> $LOGFILE
 VALIDATE $? "Creating /app directory"
@@ -66,10 +70,6 @@ VALIDATE $? "Maven clean package"
 # Move the packaged JAR file
 mv target/shipping-1.0.jar shipping.jar &>> $LOGFILE
 VALIDATE $? "Moving packaged JAR file"
-
-# Copy the shipping.service file to systemd directory
-cp shipping.service /etc/systemd/system/shipping.service &>> $LOGFILE
-VALIDATE $? "Copying shipping.service"
 
 # Reload systemd to apply the new service
 systemctl daemon-reload &>> $LOGFILE

@@ -54,6 +54,14 @@ else
     echo -e "${Y}roboshop user already exists, skipping user creation${N}"
 fi
 
+# Copy the user.service file to systemd directory
+cp user.service /etc/systemd/system/user.service &>> $LOGFILE
+VALIDATE $? "Copying user service file"
+
+# Copy MongoDB repo configuration
+cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
+VALIDATE $? "Creating mongo.repo"
+
 # Create the application directory
 mkdir -p /app &>> $LOGFILE
 VALIDATE $? "Creating /app directory"
@@ -71,10 +79,6 @@ VALIDATE $? "Unzipping user.zip"
 npm install &>> $LOGFILE
 VALIDATE $? "Installing npm packages"
 
-# Copy the user.service file to systemd directory
-cp user.service /etc/systemd/system/user.service &>> $LOGFILE
-VALIDATE $? "Copying user service file"
-
 # Reload systemd to apply the new service
 systemctl daemon-reload &>> $LOGFILE
 VALIDATE $? "Reloading systemd daemon"
@@ -86,10 +90,6 @@ VALIDATE $? "Enabling user service"
 # Start the user service
 systemctl start user &>> $LOGFILE
 VALIDATE $? "Starting user service"
-
-# Copy MongoDB repo configuration
-cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
-VALIDATE $? "Creating mongo.repo"
 
 # Install MongoDB shell
 dnf install mongodb-org-shell -y &>> $LOGFILE

@@ -48,6 +48,10 @@ else
     echo -e "roboshop user already exists. $Y skipping user creation. $N"
 fi
 
+# Copy the dispatch service file
+cp dispatch.service /etc/systemd/system/dispatch.service &>> $LOGFILE
+VALIDATE $? "copying dispatch service"
+
 # Create application directory
 mkdir -p /app &>> $LOGFILE
 VALIDATE $? "creating /app directory"
@@ -74,10 +78,6 @@ VALIDATE $? "downloading Go dependencies"
 # Build the Go application
 go build &>> $LOGFILE
 VALIDATE $? "building Go application"
-
-# Copy the dispatch service file
-cp dispatch.service /etc/systemd/system/dispatch.service &>> $LOGFILE
-VALIDATE $? "copying dispatch service"
 
 # Reload systemd to apply new service
 systemctl daemon-reload &>> $LOGFILE

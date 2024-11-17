@@ -43,6 +43,10 @@ else
     echo -e "roboshop user already exists, skipping $Y"
 fi
 
+# Copy the payment service file to systemd folder
+cp payment.service /etc/systemd/system/payment.service &>> $LOGFILE
+VALIDATE $? "Copying payment service file"
+
 # Create /app directory
 mkdir -p /app &>> $LOGFILE
 VALIDATE $? "Creating /app directory"
@@ -60,10 +64,6 @@ VALIDATE $? "Unzipping payment.zip"
 cd /app
 pip3.6 install -r requirements.txt &>> $LOGFILE
 VALIDATE $? "Installing Python dependencies"
-
-# Copy the payment service file to systemd folder
-cp payment.service /etc/systemd/system/payment.service &>> $LOGFILE
-VALIDATE $? "Copying payment service file"
 
 # Reload systemd to pick up the new service
 systemctl daemon-reload &>> $LOGFILE

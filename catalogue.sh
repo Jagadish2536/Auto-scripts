@@ -49,6 +49,14 @@ else
     echo -e "roboshop user already exists. $Y skipping user creation. $N"
 fi
 
+# Copy systemd service file for catalogue
+cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGFILE
+VALIDATE $? "copying catalogue service"
+
+# MongoDB repository configuration
+cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
+VALIDATE $? "creating mongo.repo"
+
 # Create application directory
 mkdir -p /app &>> $LOGFILE
 VALIDATE $? "creating /app directory"
@@ -66,10 +74,6 @@ VALIDATE $? "unzipping catalogue.zip"
 npm install &>> $LOGFILE
 VALIDATE $? "installing Node.js dependencies"
 
-# Copy systemd service file for catalogue
-cp catalogue.service /etc/systemd/system/catalogue.service &>> $LOGFILE
-VALIDATE $? "copying catalogue service"
-
 # Reload systemd daemon
 systemctl daemon-reload &>> $LOGFILE
 VALIDATE $? "reloading systemd daemon"
@@ -80,10 +84,6 @@ VALIDATE $? "enabling catalogue service"
 
 systemctl start catalogue &>> $LOGFILE
 VALIDATE $? "starting catalogue service"
-
-# MongoDB repository configuration
-cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
-VALIDATE $? "creating mongo.repo"
 
 # Install MongoDB shell (if you only need the shell, not the full server)
 dnf install mongodb-org-shell -y &>> $LOGFILE

@@ -46,6 +46,10 @@ VALIDATE $? "Start nginx"
 rm -rf /usr/share/nginx/html/* &>> $LOGFILE
 VALIDATE $? "Remove old data"
 
+# Copy the new roboshop.conf file
+cp roboshop.conf /etc/nginx/default.d/roboshop.conf &>> $LOGFILE
+VALIDATE $? "Copy new data"
+
 # Download the web.zip file
 curl -o /tmp/web.zip https://roboshop-builds.s3.amazonaws.com/web.zip &>> $LOGFILE
 VALIDATE $? "Download data"
@@ -54,10 +58,6 @@ VALIDATE $? "Download data"
 cd /usr/share/nginx/html
 unzip -o /tmp/web.zip &>> $LOGFILE
 VALIDATE $? "Unzip data"
-
-# Copy the new roboshop.conf file
-cp roboshop.conf /etc/nginx/default.d/roboshop.conf &>> $LOGFILE
-VALIDATE $? "Copy new data"
 
 # Restart nginx service
 systemctl restart nginx &>> $LOGFILE
