@@ -54,8 +54,13 @@ VALIDATE $? "Starting RabbitMQ service"
 sleep 5
 
 # Add RabbitMQ user
-rabbitmqctl add_user roboshop roboshop123 &>> $LOGFILE
-VALIDATE $? "Adding RabbitMQ user"
+id roboshop &>> $LOGFILE
+if [ $? -ne 0 ]; then
+    rabbitmqctl add_user roboshop roboshop123 &>> $LOGFILE
+    VALIDATE $? "Adding RabbitMQ user"
+else
+    echo -e "roboshop user already exists. $Y skipping user creation. $N"
+fi
 
 # Set permissions for the new user
 rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*" &>> $LOGFILE
