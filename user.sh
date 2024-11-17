@@ -96,5 +96,5 @@ dnf install mongodb-org-shell -y &>> $LOGFILE
 VALIDATE $? "Installing mongodb-org-shell"
 
 # Connect to MongoDB and run the schema script
-mongo --host $MONGODBIP </app/schema/catalogue.js &>> $LOGFILE
+mongo --host $MONGODBIP </app/schema/user.js &>> $LOGFILE
 VALIDATE $? "Connecting to MongoDB and running schema script"
