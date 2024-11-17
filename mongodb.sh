@@ -30,24 +30,24 @@ VALIDATE() {
 
 # Copy the MongoDB repo file
 cp mongodb.repo /etc/yum.repos.d/mongo.repo &>> $LOGFILE
-VALIDATE "creating mongo.repo"
+VALIDATE $? "creating mongo.repo"
 
 # Install MongoDB
 dnf install mongodb-org -y &>> $LOGFILE
-VALIDATE "installing mongodb"
+VALIDATE $? "installing mongodb"
 
 # Enable the MongoDB service to start on boot
 systemctl enable mongod &>> $LOGFILE
-VALIDATE "enabling mongodb"
+VALIDATE $? "enabling mongodb"
 
 # Start MongoDB service
 systemctl start mongod &>> $LOGFILE
-VALIDATE "starting mongodb"
+VALIDATE $? "starting mongodb"
 
 # Modify bind IP in mongod.conf to allow connections from any IP
 sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf &>> $LOGFILE
-VALIDATE "configuring bind IP"
+VALIDATE $? "configuring bind IP"
 
 # Restart MongoDB service to apply changes
 systemctl restart mongod &>> $LOGFILE
-VALIDATE "restarting mongodb"
+VALIDATE $? "restarting mongodb"

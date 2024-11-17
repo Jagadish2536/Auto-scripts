@@ -48,6 +48,10 @@ else
     echo -e "roboshop user already exists. $Y skipping user creation. $N"
 fi
 
+# Copy systemd service file for catalogue
+cp cart.service /etc/systemd/system/cart.service &>> $LOGFILE
+VALIDATE $? "copying catalogue service"
+
 # Create application directory
 mkdir -p /app &>> $LOGFILE
 VALIDATE $? "creating /app directory"
