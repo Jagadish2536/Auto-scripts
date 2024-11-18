@@ -4,7 +4,7 @@ R="\e[31m"  # Red color for error
 G="\e[32m"  # Green color for success
 Y="\e[33m"  # Yellow color for warnings
 N="\e[0m"   # Reset color
-MONGODBIP=172.31.37.214  # MongoDB IP
+MONGODBIP=172.31.34.10  # MongoDB IP
 
 TIME=$(date +%F-%H-%M-%S)
 LOGFILE="/tmp/$0-$TIME.log"
