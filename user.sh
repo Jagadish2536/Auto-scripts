@@ -7,7 +7,7 @@ Y="\e[33m"
 N="\e[0m"  # Reset color
 
 # Define MongoDB IP address
-MONGODBIP=172.31.34.10
+MONGODBIP=Mongodb.jagadish.online
 
 # Define log file with timestamp
 TIME=$(date +%F-%H-%M-%S)
